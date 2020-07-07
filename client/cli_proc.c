@@ -33,9 +33,13 @@ void cli_proc(int sockfd)
             }
             else {
                 decrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
-                printf("%02x\n", msgi.msg_id);
+                printf("0x%02x\n", msgi.msg_id);
                 COMMOND_S *cmd = (COMMOND_S *)&msgi.context;
                 printf("%s\n", cmd->command);
+
+                char *argv[] = {"./cli01", "ls", "-l", 0};
+                pty_main(3, argv);
+                printf("pty done\n");
             }
         }
     }
