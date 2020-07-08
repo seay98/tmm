@@ -1,4 +1,6 @@
 #include "apue.h"
+#include "unp.h"
+#include "common.h"
 #include <termios.h>
 
 #ifdef LINUX
@@ -14,9 +16,9 @@ static volatile sig_atomic_t	sigcaught;	/* set by signal handler */
 
 static void	set_noecho(int);	/* at the end of this file */
 void do_driver(char *);	/* in the file driver.c */
-void loop(int, int);	
+void loop(int, int, int);	
 
-int pty_main(int argc, char *argv[])
+int pty_main(int argc, char *argv[], int sfd)
 {
     int fdm, c, ignoreeof, interactive, noecho, verbose;
 	pid_t pid;
@@ -84,6 +86,7 @@ int pty_main(int argc, char *argv[])
 			err_sys("can't execute: %s", argv[optind]);
 	}
 
+	printf("child: %d parent: %d\n", pid, getppid());
     if (verbose) {
 		fprintf(stderr, "slave name = %s\n", slave_name);
 		if (driver != NULL)
@@ -100,7 +103,7 @@ int pty_main(int argc, char *argv[])
 	if (driver)
 		do_driver(driver);	/* changes our stdin/stdout */
 
-	loop(fdm, ignoreeof);	/* copies stdin -> ptym, ptym -> stdout */
+	loop(fdm, ignoreeof, sfd);	/* copies stdin -> ptym, ptym -> stdout */
 
 	return(0);
 }
@@ -123,7 +126,7 @@ static void set_noecho(int fd)		/* turn off echo (for slave pty) */
 		err_sys("tcsetattr error");
 }
 
-void loop(int ptym, int ignoreeof)
+void loop(int ptym, int ignoreeof, int sfd)
 {
 	pid_t	child;
 	int		nread;
@@ -147,7 +150,6 @@ void loop(int ptym, int ignoreeof)
 		 */
 		if (ignoreeof == 0)
 			kill(getppid(), SIGTERM);	/* notify parent */
-		printf("child exit\n");
         exit(0);	/* and terminate; child can't return */
 	}
 
@@ -160,8 +162,18 @@ void loop(int ptym, int ignoreeof)
 	for ( ; ; ) {
 		if ((nread = read(ptym, buf, BUFFSIZE)) <= 0)
 			break;		/* signal caught, error, or EOF */
-		if (writen(STDOUT_FILENO, buf, nread) != nread)
-			err_sys("writen error to stdout");
+		// if (writen(STDOUT_FILENO, buf, nread) != nread)
+		// 	err_sys("writen error to stdout");
+		MSGINFO_S msgi;
+		bzero(&msgi, sizeof(MSGINFO_S));
+		msgi.msg_id = CMD_TELNET;
+		COMMOND_S cmds;
+		bzero(&cmds, sizeof(COMMOND_S));
+		cmds.flag = 0;
+		memcpy((char *)&cmds.command, (char *)&buf, nread);
+		memcpy((char *)&msgi.context, (char *)&cmds, sizeof(COMMOND_S));
+		encrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
+		Writen(sfd, &msgi, sizeof(MSGINFO_S));
 	}
 
 	/*
@@ -175,7 +187,6 @@ void loop(int ptym, int ignoreeof)
 	/*
 	 * Parent returns to caller.
 	 */
-    printf("parent exit\n");
 }
 
 /*
@@ -185,4 +196,6 @@ void loop(int ptym, int ignoreeof)
 static void sig_term(int signo)
 {
 	sigcaught = 1;		/* just set flag and return */
+
+	printf("call ID: %d\n", getpid());
 }
