@@ -31,16 +31,13 @@ bool fetch_sysinfo(void * msgi)
         }
     }
 
-    wchar_t wcs[MAX_PATH];
+    wchar_t wcs[512];
     struct utsname hname;
     uname(&hname);
-    swprintf(wcs, MAX_PATH, L"%s %s", hname.sysname, hname.release);
-    char *ibuf = (char *)&wcs;
-    char *obuf = sysinfo.szCPUInfo;
-    size_t ilen = MAX_PATH * 4;
-    size_t olen = MAX_PATH;
-    iconv_t iv = iconv_open("UTF-8", "UCS-2");
-    iconv (iv, &ibuf, &ilen, &obuf, &olen);
+    swprintf(wcs, 512, L"%s %s", hname.sysname, hname.release);
+    size_t ilen = 512;
+    size_t olen = 512;
+    iconv_ucs2(wcs, &ilen, sysinfo.szCPUInfo, &olen);
 
     sysinfo.dwDiskSize = 1024;
 

@@ -7,6 +7,7 @@ void cli_proc(int sockfd)
     int maxfdp1;
     fd_set rset;
     MSGINFO_S msgi;
+    int shfdin;
 
     FD_ZERO(&rset);
     bzero(&msgi, sizeof(MSGINFO_S));
@@ -33,29 +34,21 @@ void cli_proc(int sockfd)
             else {
                 decrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
                 printf("0x%02x\n", msgi.msg_id);
-                COMMOND_S *cmd = (COMMOND_S *)&msgi.context;
-                printf("%s\n", cmd->command);
 
-                char *argv[] = {"./cli01", "bash", 0};
-                pid_t cpid;
-                if ((cpid = fork()) < 0) {
-                    err_sys("fork error");
-                }else if (cpid == 0) {
-                    pty_main(3, argv, sockfd);
-                    // char buf[] = "bash:#";
-                    // bzero(&msgi, sizeof(MSGINFO_S));
-                    // msgi.msg_id = CMD_TELNET;
-                    // COMMOND_S cmds;
-                    // bzero(&cmds, sizeof(COMMOND_S));
-                    // cmds.flag = 0;
-                    // memcpy((char *)&cmds.command, (char *)&buf, strlen(buf));
-                    // memcpy((char *)&msgi.context, (char *)&cmds, sizeof(COMMOND_S));
-                    // encrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
-                    // Writen(sockfd, &msgi, sizeof(MSGINFO_S));
-                    // printf("pty fork done\n");
-                    exit(0);
+                switch (msgi.msg_id)
+                {
+                case CMD_TELNET:
+                    startshell(sockfd, &shfdin);
+                    break;
+
+                case CMD_COMMOND:
+                    
+                    break;
+                
+                default:
+                    break;
                 }
-                printf("pty read\n");
+
             }
         }
     }

@@ -9,16 +9,16 @@
 #define OPTSTR "d:einv"
 #endif
 
-#define	BUFFSIZE	512
+#define	TBUFFSIZE	512
 
 static void	sig_term(int);
 static volatile sig_atomic_t	sigcaught;	/* set by signal handler */
 
 static void	set_noecho(int);	/* at the end of this file */
 void do_driver(char *);	/* in the file driver.c */
-void loop(int, int, int);	
+void loop(int, int);	
 
-int pty_main(int argc, char *argv[], int sfd)
+int pty_main(int argc, char *argv[])
 {
     int fdm, c, ignoreeof, interactive, noecho, verbose;
 	pid_t pid;
@@ -69,11 +69,11 @@ int pty_main(int argc, char *argv[], int sfd)
 			err_sys("tcgetattr error on stdin");
 		if (ioctl(STDIN_FILENO, TIOCGWINSZ, (char *) &size) < 0)
 			err_sys("TIOCGWINSZ error");
-		pid = pty_fork(&fdm, slave_name, sizeof(slave_name),
-		  &orig_termios, &size);
+		pid = pty_fork(&fdm, slave_name, sizeof(slave_name), &orig_termios, &size);
 	} else {
-		pid = pty_fork(&fdm, slave_name, sizeof(slave_name),
-		  NULL, NULL);
+		// memset(&orig_termios, 0, sizeof(struct termios));
+		// orig_termios.c_iflag |= IUTF8;
+		pid = pty_fork(&fdm, slave_name, sizeof(slave_name), &orig_termios, NULL);
 	}
 
     if (pid < 0) {
@@ -83,10 +83,11 @@ int pty_main(int argc, char *argv[], int sfd)
 			set_noecho(STDIN_FILENO);	/* stdin is slave pty */
 
 		if (execvp(argv[optind], &argv[optind]) < 0)
+		// if (execl("/bin/bash", "bash", (char*)0) < 0)
 			err_sys("can't execute: %s", argv[optind]);
 	}
 
-	printf("child: %d parent: %d\n", pid, getppid());
+	// printf("child: %d parent: %d\n", pid, getppid());
     if (verbose) {
 		fprintf(stderr, "slave name = %s\n", slave_name);
 		if (driver != NULL)
@@ -100,12 +101,12 @@ int pty_main(int argc, char *argv[], int sfd)
 			err_sys("atexit error");
 	}
 
-	if (driver)
-		do_driver(driver);	/* changes our stdin/stdout */
+	// if (driver)
+	// 	do_driver(driver);	/* changes our stdin/stdout */
 
-	loop(fdm, ignoreeof, sfd);	/* copies stdin -> ptym, ptym -> stdout */
+	loop(fdm, ignoreeof);	/* copies stdin -> ptym, ptym -> stdout */
 
-	return(0);
+	return(fdm);
 }
 
 static void set_noecho(int fd)		/* turn off echo (for slave pty) */
@@ -126,17 +127,17 @@ static void set_noecho(int fd)		/* turn off echo (for slave pty) */
 		err_sys("tcsetattr error");
 }
 
-void loop(int ptym, int ignoreeof, int sfd)
+void loop(int ptym, int ignoreeof)
 {
 	pid_t	child;
 	int		nread;
-	char	buf[BUFFSIZE];
+	char	buf[TBUFFSIZE];
 
 	if ((child = fork()) < 0) {
 		err_sys("fork error");
 	} else if (child == 0) {	/* child copies stdin to ptym */
         for ( ; ; ) {
-			if ((nread = read(STDIN_FILENO, buf, BUFFSIZE)) < 0)
+			if ((nread = read(STDIN_FILENO, buf, TBUFFSIZE)) < 0)
 				err_sys("read error from stdin");
 			else if (nread == 0)
 				break;		/* EOF on stdin means we're done */
@@ -160,20 +161,10 @@ void loop(int ptym, int ignoreeof, int sfd)
 		err_sys("signal_intr error for SIGTERM");
 
 	for ( ; ; ) {
-		if ((nread = read(ptym, buf, BUFFSIZE)) <= 0)
+		if ((nread = read(ptym, buf, TBUFFSIZE)) <= 0)
 			break;		/* signal caught, error, or EOF */
-		// if (writen(STDOUT_FILENO, buf, nread) != nread)
-		// 	err_sys("writen error to stdout");
-		MSGINFO_S msgi;
-		bzero(&msgi, sizeof(MSGINFO_S));
-		msgi.msg_id = CMD_TELNET;
-		COMMOND_S cmds;
-		bzero(&cmds, sizeof(COMMOND_S));
-		cmds.flag = 0;
-		memcpy((char *)&cmds.command, (char *)&buf, nread);
-		memcpy((char *)&msgi.context, (char *)&cmds, sizeof(COMMOND_S));
-		encrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
-		Writen(sfd, &msgi, sizeof(MSGINFO_S));
+		if (writen(STDOUT_FILENO, buf, nread) != nread)
+			err_sys("writen error to stdout");
 	}
 
 	/*
