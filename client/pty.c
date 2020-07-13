@@ -71,9 +71,7 @@ int pty_main(int argc, char *argv[])
 			err_sys("TIOCGWINSZ error");
 		pid = pty_fork(&fdm, slave_name, sizeof(slave_name), &orig_termios, &size);
 	} else {
-		// memset(&orig_termios, 0, sizeof(struct termios));
-		// orig_termios.c_iflag |= IUTF8;
-		pid = pty_fork(&fdm, slave_name, sizeof(slave_name), &orig_termios, NULL);
+		pid = pty_fork(&fdm, slave_name, sizeof(slave_name), NULL, NULL);
 	}
 
     if (pid < 0) {

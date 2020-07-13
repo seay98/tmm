@@ -3,7 +3,6 @@
 
 int main (int argc, char **argv)
 {
-    printf("cli set off\n");
     int sockfd;
     struct sockaddr_in servaddr;
     
