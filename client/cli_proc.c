@@ -15,6 +15,7 @@ void cli_proc(int sockfd)
     int nread;
     char buf[TBUFFSIZE];
     COMMOND_S cmds;
+    int ptyid = -1;
 
     FD_ZERO(&rset);
     for ( ; ; )
@@ -43,7 +44,7 @@ void cli_proc(int sockfd)
             if ((CMD_SHAKEHAND == msgi.msg_id) && (0 == strcmp(beacon, (char *)msgi.context)))
             {
                 bzero(&msgi, sizeof(MSGINFO_S));
-                bool res = fetch_sysinfo(&msgi);
+                int res = fetch_sysinfo(&msgi);
                 msgi.msg_id = CMD_SYSINFO;
                 if (res)
                 {
@@ -61,7 +62,7 @@ void cli_proc(int sockfd)
                     if (pipe(fd1) < 0 || pipe(fd2) < 0)
                         err_sys("pipe error");
 
-                    startshell(fd1, fd2);
+                    ptyid = startshell(fd1, fd2);
                     shact = 1;
                 }
                 if (CMD_COMMOND == msgi.msg_id)
@@ -72,6 +73,8 @@ void cli_proc(int sockfd)
                     if (0 == strncmp("exit", (char *)cmd->command, 4))
                     {
                         shact = 0;
+                        if (waitpid(ptyid, NULL, 0) != ptyid)
+                            err_sys("wait error");
                     }
                 }
             }
@@ -96,8 +99,6 @@ void cli_proc(int sockfd)
             memcpy((char *)&msgi.context, (char *)&cmds, sizeof(COMMOND_S));
             encrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
             Writen(sockfd, &msgi, sizeof(MSGINFO_S));
-            // writen(fd1[1], "ls\n", strlen("ls\n"));
-            // sleep(1);
         }
     }
 }

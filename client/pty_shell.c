@@ -3,7 +3,7 @@
 #include "common.h"
 #include "cmfc.h"
 
-void startshell(int *fd1, int *fd2)
+int startshell(int *fd1, int *fd2)
 {
     pid_t cpid;
     char *argv[] = {"bash", "bash", 0};
@@ -36,4 +36,5 @@ void startshell(int *fd1, int *fd2)
     sleep(1);
     if (writen(fd1[1], "unset PROMPT_COMMAND\n", strlen("unset PROMPT_COMMAND\n")) != strlen("unset PROMPT_COMMAND\n"))
         err_sys("writen error to master pty");
+    return cpid;
 }

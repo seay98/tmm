@@ -2,7 +2,7 @@
 #include "cmfc.h"
 #include "common.h"
 
-bool fetch_sysinfo(void * msgi)
+int fetch_sysinfo(void * msgi)
 {
     MSGINFO_S * msgptr = (MSGINFO_S *)msgi;
     SYSTEMINFO_S sysinfo;
@@ -31,16 +31,19 @@ bool fetch_sysinfo(void * msgi)
         }
     }
 
-    wchar_t wcs[512];
+    wchar_t wcs[MAX_PATH/4];
     struct utsname hname;
     uname(&hname);
-    swprintf(wcs, 512, L"%s %s", hname.sysname, hname.release);
-    size_t ilen = 512;
-    size_t olen = 512;
-    iconv_ucs2(wcs, &ilen, sysinfo.szCPUInfo, &olen);
+    swprintf(wcs, MAX_PATH/4, L"%s %s", hname.sysname, hname.release);
+    char *ibuf = (char *)wcs;
+    char *obuf = sysinfo.szCPUInfo;
+    size_t ilen = MAX_PATH/4;
+    size_t olen = MAX_PATH;
+    iconv_t iv = iconv_open("UTF-8", "UCS-2");
+    iconv (iv, &ibuf, &ilen, &obuf, &olen);
 
     sysinfo.dwDiskSize = 1024;
 
     memcpy((char *)msgptr->context, (char *)&sysinfo, CONTEXT_BUF_SIZE);
-    return true;
+    return(1);
 }

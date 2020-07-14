@@ -1,16 +1,6 @@
 #include "unp.h"
 #include "cmfc.h"
 
-void iconv_ucs2(wchar_t *winstr, size_t *inlen, char *outstr, size_t *outlen)
-{
-    char *ibuf = (char *)winstr;
-    char *obuf = outstr;
-    size_t *ilen = inlen;
-    size_t *olen = outlen;
-    iconv_t iv = iconv_open("UTF-8", "UCS-2");
-    iconv (iv, &ibuf, ilen, &obuf, olen);
-}
-
 void encrypt_buf(char *buf, size_t len)
 {
     for (int i=0; i<len; i++) {
