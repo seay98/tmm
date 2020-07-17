@@ -6,7 +6,7 @@
 #include <wchar.h>
 #include <iconv.h>
 
-void cli_proc(int);
+void cli_proc(const int *);
 int fetch_sysinfo(void *);
 int pty_main(int, char *[]);
 int startshell(int*, int*);

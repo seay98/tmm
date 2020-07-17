@@ -4,11 +4,12 @@
 
 #define TBUFFSIZE 512
 
-void cli_proc(int sockfd)
+void cli_proc(const int *sockfd)
 {
     int maxfdp1;
     fd_set rset;
     MSGINFO_S msgi;
+    int online = -1;
 
     int fd1[2], fd2[2];
     int shact = 0;
@@ -24,18 +25,18 @@ void cli_proc(int sockfd)
         bzero(&cmds, sizeof(COMMOND_S));
         bzero(buf, TBUFFSIZE);
 
-        FD_SET(sockfd, &rset);
-        maxfdp1 = sockfd + 1;
+        FD_SET(*sockfd, &rset);
+        maxfdp1 = *sockfd + 1;
         if (shact)
         {
             FD_SET(fd2[0], &rset);
-            maxfdp1 = max(sockfd, fd2[0]) + 1;
+            maxfdp1 = max(*sockfd, fd2[0]) + 1;
         }
         Select(maxfdp1, &rset, NULL, NULL, NULL);
 
-        if (FD_ISSET(sockfd, &rset))
+        if (FD_ISSET(*sockfd, &rset))
         {
-            if (Readn(sockfd, &msgi, sizeof(MSGINFO_S)) == 0)
+            if (Readn(*sockfd, &msgi, sizeof(MSGINFO_S)) == 0)
             {
                 err_quit("cli_proc: server terminated prematurely!");
             }
@@ -49,10 +50,11 @@ void cli_proc(int sockfd)
                 if (res)
                 {
                     encrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
-                    Writen(sockfd, &msgi, sizeof(MSGINFO_S));
+                    Writen(*sockfd, &msgi, sizeof(MSGINFO_S));
+                    online = 0;
                 }
             }
-            else
+            if (online == 0)
             {
                 decrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
                 // printf("0x%02x\n", msgi.msg_id);
@@ -98,7 +100,7 @@ void cli_proc(int sockfd)
 
             memcpy((char *)&msgi.context, (char *)&cmds, sizeof(COMMOND_S));
             encrypt_buf((char *)&msgi, sizeof(MSGINFO_S));
-            Writen(sockfd, &msgi, sizeof(MSGINFO_S));
+            Writen(*sockfd, &msgi, sizeof(MSGINFO_S));
         }
     }
 }
