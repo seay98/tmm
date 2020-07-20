@@ -36,9 +36,10 @@ void cli_proc(const int *sockfd)
 
         if (FD_ISSET(*sockfd, &rset))
         {
-            if (Readn(*sockfd, &msgi, sizeof(MSGINFO_S)) == 0)
+            if (Readn(*sockfd, &msgi, sizeof(MSGINFO_S)) <= 0)
             {
-                err_quit("cli_proc: server terminated prematurely!");
+                err_msg("cli_proc: server terminated prematurely!");
+                break;
             }
 
             char *beacon = "Jo*Po*Hello";
@@ -61,8 +62,10 @@ void cli_proc(const int *sockfd)
 
                 if (CMD_TELNET == msgi.msg_id)
                 {
-                    if (pipe(fd1) < 0 || pipe(fd2) < 0)
-                        err_sys("pipe error");
+                    if (pipe(fd1) < 0 || pipe(fd2) < 0) {
+                        err_msg("pipe error");
+                        continue;
+                    }
 
                     ptyid = startshell(fd1, fd2);
                     shact = 1;
@@ -70,13 +73,16 @@ void cli_proc(const int *sockfd)
                 if (CMD_COMMOND == msgi.msg_id)
                 {
                     COMMOND_S *cmd = (COMMOND_S *)&msgi.context;
-                    if (writen(fd1[1], cmd->command, strlen(cmd->command)) != strlen(cmd->command))
-                        err_sys("writen error to master pty");
+                    if (writen(fd1[1], cmd->command, strlen(cmd->command)) != strlen(cmd->command)) {
+                        err_msg("writen error to master pty");
+                        continue;
+                    }
+                        
                     if (0 == strncmp("exit", (char *)cmd->command, 4))
                     {
                         shact = 0;
                         if (waitpid(ptyid, NULL, 0) != ptyid)
-                            err_sys("wait error");
+                            err_msg("wait error");
                     }
                 }
             }
@@ -84,8 +90,11 @@ void cli_proc(const int *sockfd)
 
         if (FD_ISSET(fd2[0], &rset))
         {
-            if ((nread = read(fd2[0], buf, TBUFFSIZE)) <= 0)
-                err_sys("read error from stdin");
+            if ((nread = read(fd2[0], buf, TBUFFSIZE)) <= 0) {
+                err_msg("read error from stdin");
+                continue;
+            }
+                
             // buf[nread + 1] = 0;
             msgi.msg_id = CMD_TELNET;
             cmds.flag = 0;
