@@ -1,7 +1,7 @@
 include ../Make.defines
 
 PROGS = clid
-OBJS = clid.o init.o single.o lockfile.o
+OBJS = clid.o init.o single.o lockfile.o hdown.o
 
 all: ${PROGS}
 

