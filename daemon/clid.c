@@ -41,12 +41,13 @@ void *thr_upd(void *arg)
         {
             if ((n = strlen(buf)) > 32)
             {
-                if (strncmp(param->md5val, buf, 32) > 0)
+                if ((n = strncmp(param->md5val, buf, 32)) != 0)
                 {
                     kill(*param->pid, SIGTERM);
                     syslog(LOG_ERR, "need update");
                     break;
                 }
+                // syslog(LOG_ERR, "%d::%s::%s", n, param->md5val, buf);
             }
         }
         sleep(60);

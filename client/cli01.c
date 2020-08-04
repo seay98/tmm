@@ -35,9 +35,9 @@ int main(int argc, char **argv)
                 close(sockfd);
             }
         }
-        sleep(sn + 60);
-        sn += 10;
-        if (sn > 600)
-            sn = 0;
+        sleep(sn + 30);
+        // sn += 10;
+        // if (sn > 600)
+        //     sn = 0;
     }
 }
