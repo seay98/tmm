@@ -86,6 +86,11 @@ void cli_proc(const int *sockfd)
                     }
                 }
             }
+            else
+            {
+                break;
+            }
+            
         }
 
         if (FD_ISSET(fd2[0], &rset))

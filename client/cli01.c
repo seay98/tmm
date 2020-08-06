@@ -1,11 +1,12 @@
 #include "unp.h"
 #include "cmfc.h"
+#include <syslog.h>
 
 int Conn(int fd, const struct sockaddr *sa, socklen_t salen)
 {
     int res;
-	res = connect(fd, sa, salen);
-        // printf("conn err\n");
+    res = connect(fd, sa, salen);
+    // printf("conn err\n");
     return res;
 }
 
@@ -18,6 +19,20 @@ int main(int argc, char **argv)
     char servip[24];
     short port = 4433;
 
+    int fdnull;
+
+	openlog("cli01", LOG_CONS, LOG_DAEMON);
+    fdnull = open("/dev/null", O_RDWR);
+    if (dup2(fdnull, STDOUT_FILENO) != STDOUT_FILENO)
+    {
+        syslog(LOG_ERR, "dup2 error to stdout");
+        exit(1);
+    }
+    if (dup2(STDOUT_FILENO, STDERR_FILENO) != STDERR_FILENO)
+    {
+        syslog(LOG_ERR, "dup2 error to stderr");
+        exit(1);
+    }
     for (;;)
     {
         if ((get_servaddr(servip, &port)) == 0)
