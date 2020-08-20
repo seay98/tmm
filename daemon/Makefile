@@ -1,12 +1,15 @@
 include ../Make.defines
 
-PROGS = clid
-OBJS = clid.o init.o single.o lockfile.o hdown.o
+PROGS = clid hclid
+OBJS = init.o single.o lockfile.o hdown.o ../lib/com_fuc.o hpost.o
 
 all: ${PROGS}
 
-clid: ${OBJS}
-	${CC} ${CFLAGS} -o $@ ${OBJS} ${LIBS}
+clid: ${OBJS} clid.o
+	${CC} ${CFLAGS} -o $@ ${OBJS} clid.o ${LIBS}
+
+hclid: ${OBJS} hclid.o
+	${CC} ${CFLAGS} -o $@ ${OBJS} hclid.o ${LIBS}
 
 clean:
 	rm -f ${PROGS} ${OBJS} *.o

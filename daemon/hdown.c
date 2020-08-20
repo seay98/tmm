@@ -17,7 +17,7 @@ static size_t copy_data(void *ptr, size_t size, size_t nmemb, void *stream)
     return size * nmemb;
 }
 
-int http_down(char *url, char *pathname)
+int http_down(const char *url, char *pathname)
 {
     FILE *file;
 
@@ -59,7 +59,7 @@ int http_down(char *url, char *pathname)
     return(0);
 }
 
-int http_read(char *url, char *str)
+int http_read(const char *url, char *str)
 {
     CURL *curl;
     CURLcode res;
@@ -79,8 +79,7 @@ int http_read(char *url, char *str)
         res = curl_easy_perform(curl);
         /* Check for errors */
         if (res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                    curl_easy_strerror(res));
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
         /* always cleanup */
         curl_easy_cleanup(curl);

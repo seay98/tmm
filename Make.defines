@@ -10,5 +10,5 @@
 
 CC = gcc
 CFLAGS = -I../include -g -O2 -Wall -std=gnu99
-LIBS = ../lib/libunp.a ../lib/libapue.a -lpthread -lcurl
+LIBS =  ../lib/libunp.a ../lib/libapue.a -lpthread -lcurl
 
