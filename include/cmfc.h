@@ -8,6 +8,7 @@
 
 void cli_proc(const int *);
 int fetch_sysinfo(void *);
+int fetch_sysinfos(char *);
 int pty_main(int, char *[]);
 int startshell(int*, int*);
 int get_servaddr(char *, short *);

