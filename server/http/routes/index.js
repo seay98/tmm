@@ -9,7 +9,35 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/moien', function (req, res, next) {
-    res.send('<h1>moien</h1>');
+    // select infos from db
+    let db = new sqlite3.Database('clis.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+        if (err) {
+            console.error(err.message);
+        }
+        // console.log('Connected to the clients database.');
+    });
+
+    let clis = {};
+    db.serialize(() => {
+        db.all(`SELECT cid, hostname, ip, os, utime FROM clients`, (err, rows) => {
+            if (err) {
+                return console.error(err.message);
+            }
+            rows.forEach((row) => {
+                const cli = {
+                    ip: row.ip,
+                    hostname: row.hostname,
+                    os: row.os,
+                    utime: row.utime,
+                };
+                let jo = JSON.stringify(cli);
+                console.log(jo);
+                clis.push(cli);
+            });
+        });
+    });
+    console.log(clis);
+    res.send(clis);
 });
 
 router.post('/moien', function (req, res, next) {
