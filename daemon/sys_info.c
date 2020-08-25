@@ -29,6 +29,6 @@ int fetch_sysinfos(char *syin)
     uname(&hname);
 
     // sprintf(syin, "hostname=1&os=2 2&ip=3");
-    sprintf(syin, "hostname=%s&os=%s %s&ip=%s", hostname, hname.sysname, hname.release, ipaddr);
+    sprintf(syin, "{hostname=%s,os=%s %s,ip=%s}", hostname, hname.sysname, hname.release, ipaddr);
     return(0);
 }

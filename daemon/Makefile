@@ -1,7 +1,7 @@
 include ../Make.defines
 
 PROGS = clid hclid
-OBJS = init.o single.o lockfile.o hdown.o ../lib/com_fuc.o hpost.o sys_info.o
+OBJS = init.o single.o lockfile.o hdown.o ../lib/com_fuc.o hpost.o sys_info.o base64.o
 
 all: ${PROGS}
 

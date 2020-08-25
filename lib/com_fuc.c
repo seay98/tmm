@@ -19,3 +19,10 @@ void decrypt_buf(char *buf, size_t len)
         buf[i] = ( ch >> 4) | (ch << 4);
     }
 }
+
+void y23_buf(char *buf, size_t len)
+{
+    for (int i=0; i<len; i++) {
+        buf[i] ^= 0x23;
+    }
+}

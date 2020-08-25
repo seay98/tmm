@@ -20,5 +20,8 @@ int http_postb(const char *, char *, size_t, char *);
 
 void encrypt_buf(char *, size_t);
 void decrypt_buf(char *, size_t);
+void y23_buf(char *, size_t);
+unsigned char * base64_encode(const unsigned char *, size_t len, size_t *out_len);
+unsigned char * base64_decode(const unsigned char *, size_t len, size_t *out_len);
 
 #endif

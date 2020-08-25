@@ -17,32 +17,36 @@ router.get('/moien', function (req, res, next) {
         // console.log('Connected to the clients database.');
     });
 
-    let clis = {};
+    let clis = [];
+    let cli = {};
     db.serialize(() => {
         db.all(`SELECT cid, hostname, ip, os, utime FROM clients`, (err, rows) => {
             if (err) {
                 return console.error(err.message);
             }
             rows.forEach((row) => {
-                const cli = {
+                cli = {
                     ip: row.ip,
                     hostname: row.hostname,
                     os: row.os,
                     utime: row.utime,
                 };
-                let jo = JSON.stringify(cli);
-                console.log(jo);
+                console.log(cli);
                 clis.push(cli);
             });
+            console.log(clis);
+            // res.json({clis:clis});
+            res.render('moien', { clis: clis });
         });
     });
-    console.log(clis);
-    res.send(clis);
 });
 
 router.post('/moien', function (req, res, next) {
-    console.log(req.body);
-    res.json(req.body.os);
+    // let body = Buffer.from('hello', 'utf8').toString('base64');
+    // console.log(body);
+    let body = JSON.stringify(Buffer.from(req.body.a, 'base64').toString());
+    console.log(body);
+    res.json(body);
 
     let ip = req.ip;
     if (req.ip.startsWith("::ffff:")) { // ipv4

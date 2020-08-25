@@ -1,5 +1,18 @@
 extends layout
 
 block content
-    -for (cli in clis)
-        h1=cli.ip
+    div(class='container')
+        table(class="table table-striped")
+            thead(class="thead-dark")
+                tr
+                    th(scope='col') hostname
+                    th(scope='col') IP
+                    th(scope='col') os
+                    th(scope='col') utime
+            tbody
+                each cli in clis
+                    tr
+                        td #{cli.hostname}
+                        td #{cli.ip}
+                        td #{cli.os}
+                        td #{cli.utime}
