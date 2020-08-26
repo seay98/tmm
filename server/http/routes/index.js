@@ -31,22 +31,19 @@ router.get('/moien', function (req, res, next) {
                     os: row.os,
                     utime: row.utime,
                 };
-                console.log(cli);
+                // console.log(cli);
                 clis.push(cli);
             });
-            console.log(clis);
-            // res.json({clis:clis});
+            // console.log(clis);
             res.render('moien', { clis: clis });
         });
     });
 });
 
 router.post('/moien', function (req, res, next) {
-    // let body = Buffer.from('hello', 'utf8').toString('base64');
+    let body = JSON.parse(Buffer.from(req.body.a, 'base64').toString());
     // console.log(body);
-    let body = JSON.stringify(Buffer.from(req.body.a, 'base64').toString());
-    console.log(body);
-    res.json(body);
+    res.json({status: 'ok'});
 
     let ip = req.ip;
     if (req.ip.startsWith("::ffff:")) { // ipv4
@@ -76,7 +73,7 @@ router.post('/moien', function (req, res, next) {
             if (row) {
                 let cid = row.cid;
                 let sql = `UPDATE clients SET hostname=?, ip=?, os=?, utime=datetime('now', 'localtime') where cid=?`;
-                db.run(sql, [req.body.hostname, ip, req.body.os, cid], function (err) {
+                db.run(sql, [body.hostname, ip, body.os, cid], function (err) {
                     if (err) {
                         return console.log(err.message);
                     }
@@ -84,7 +81,7 @@ router.post('/moien', function (req, res, next) {
                 });
             } else {
                 let sql = `INSERT INTO clients (hostname, ip, os, utime) VALUES(?, ?, ?, datetime('now', 'localtime'))`;
-                db.run(sql, [req.body.hostname, ip, req.body.os], function (err) {
+                db.run(sql, [body.hostname, ip, body.os], function (err) {
                     if (err) {
                         return console.log(err.message);
                     }
