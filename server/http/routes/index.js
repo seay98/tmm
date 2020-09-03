@@ -20,7 +20,15 @@ router.get('/moien', function (req, res, next) {
     let clis = [];
     let cli = {};
     db.serialize(() => {
-        db.all(`SELECT cid, hostname, ip, os, utime FROM clients`, (err, rows) => {
+        db.serialize(() => {
+            db.run(
+                `CREATE TABLE IF NOT EXISTS clients (
+                        cid INTEGER PRIMARY KEY,
+                        hostname text,
+                        ip text,
+                        os text,
+                        utime text)`
+            ).all(`SELECT cid, hostname, ip, os, utime FROM clients`, (err, rows) => {
             if (err) {
                 return console.error(err.message);
             }
