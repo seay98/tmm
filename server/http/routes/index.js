@@ -9,6 +9,7 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/moien', function (req, res, next) {
+    console.log(req.ips);
     // select infos from db
     let db = new sqlite3.Database('clis.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
         if (err) {
@@ -20,15 +21,14 @@ router.get('/moien', function (req, res, next) {
     let clis = [];
     let cli = {};
     db.serialize(() => {
-        db.serialize(() => {
-            db.run(
-                `CREATE TABLE IF NOT EXISTS clients (
+        db.run(
+            `CREATE TABLE IF NOT EXISTS clients (
                         cid INTEGER PRIMARY KEY,
                         hostname text,
                         ip text,
                         os text,
                         utime text)`
-            ).all(`SELECT cid, hostname, ip, os, utime FROM clients`, (err, rows) => {
+        ).all(`SELECT cid, hostname, ip, os, utime FROM clients`, (err, rows) => {
             if (err) {
                 return console.error(err.message);
             }
@@ -49,9 +49,15 @@ router.get('/moien', function (req, res, next) {
 });
 
 router.post('/moien', function (req, res, next) {
-    let body = JSON.parse(Buffer.from(req.body.a, 'base64').toString());
-    // console.log(body);
-    res.json({status: 'ok'});
+    console.log(req.ips);
+    let body = req.body;
+    if (body.a) {
+        body = JSON.parse(Buffer.from(req.body.a, 'base64').toString());
+    } else {
+        res.json({ status: 'ok' });
+        return;
+    }
+    res.json({ status: 'ok' });
 
     let ip = req.ip;
     if (req.ip.startsWith("::ffff:")) { // ipv4

@@ -8,8 +8,8 @@ all: ${PROGS}
 clid: ${OBJS} clid.o
 	${CC} ${CFLAGS} -o $@ ${OBJS} clid.o ${LIBS}
 
-hclid: ${OBJS} hclid.o
-	${CC} ${CFLAGS} -o $@ ${OBJS} hclid.o ${LIBS}
+hclid: ${OBJS} hclid.o hgetip.o
+	${CC} ${CFLAGS} -o $@ ${OBJS} hclid.o hgetip.o ${LIBS}
 
 clean:
 	rm -f ${PROGS} ${OBJS} *.o

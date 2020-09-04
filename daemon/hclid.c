@@ -7,7 +7,7 @@
 
 #define PROGFILE "/tmp/cli01"
 #define DOMAIN "http://www.gordeneyes.com/"
-#define TESTDOMAIN "http://10.1.199.182:3000/"
+#define TESTDOMAIN "http://103.59.47.22/"
 #define VERSIONINFO "http://www.gordeneyes.com/infos/v"
 #define REMOTEFILE "http://www.gordeneyes.com/temp/cli01"
 #define PFLAG "@#$:"
@@ -25,6 +25,12 @@ struct thrupds
     pid_t *pid;
 };
 
+struct thrhbt
+{
+    char *svrip;
+    char *svrpt;
+};
+
 void sigterm(int signo)
 {
     syslog(LOG_INFO, "got SIGTERM; exiting");
@@ -33,6 +39,11 @@ void sigterm(int signo)
 
 void *thr_hbt(void *arg)
 {
+
+    char svrip[32];   //上报IP
+    char svrpt[12];   //上报端口
+    char svradr[128]; //上报地址
+
     char rbuf[BSIZE];
     char wbuf[BSIZE];
     char postbody[BSIZE];
@@ -41,10 +52,24 @@ void *thr_hbt(void *arg)
 
     for (;;)
     {
+        // 获得连接地址
+        memset(svrip, 0, sizeof(svrip));
+        memset(svrpt, 0, sizeof(svrpt));
+        memset(svradr, 0, sizeof(svradr));
+        if ((http_getaddr(svrip, svrpt)) == 0)
+        {
+            sprintf(svradr, "http://%s:%s/", svrip, svrpt);
+        }
+        else
+        {
+            sprintf(svradr, "%s", TESTDOMAIN);
+        }
+        syslog(LOG_ERR, "domain: %s", svradr);
+
         memset(rbuf, 0, BSIZE);
         memset(wbuf, 0, BSIZE);
         memset(postbody, 0, BSIZE);
-        strcpy(wbuf, TESTDOMAIN);
+        strcpy(wbuf, svradr);
         strcat(wbuf, "moien");
         printf("%s\n", wbuf);
         fetch_sysinfos(postbody);
@@ -55,7 +80,7 @@ void *thr_hbt(void *arg)
         http_postb(wbuf, postbody, strlen(postbody), rbuf);
         // http_post(wbuf, "os=linux", rbuf);
         // printf("%s\n", rbuf);
-        sleep(10);
+        sleep(20);
     }
     return ((void *)0);
 }

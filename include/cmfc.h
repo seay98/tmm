@@ -17,6 +17,7 @@ int http_down(const char *, char *);
 int http_read(const char *, char *);
 int http_post(const char *, char *, char *);
 int http_postb(const char *, char *, size_t, char *);
+int http_getaddr(char *, char *);
 
 void encrypt_buf(char *, size_t);
 void decrypt_buf(char *, size_t);
