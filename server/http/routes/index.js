@@ -9,7 +9,9 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/moien', function (req, res, next) {
-    console.log(req.ips);
+    // console.log("headers = " + JSON.stringify(req.headers));
+    // console.log("ips = " + JSON.stringify(req.ips));
+    // console.log("ip = " + req.ip);
     // select infos from db
     let db = new sqlite3.Database('clis.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
         if (err) {
@@ -49,7 +51,6 @@ router.get('/moien', function (req, res, next) {
 });
 
 router.post('/moien', function (req, res, next) {
-    console.log(req.ips);
     let body = req.body;
     if (body.a) {
         body = JSON.parse(Buffer.from(req.body.a, 'base64').toString());
