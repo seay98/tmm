@@ -2,6 +2,7 @@
 #define	__cmfc_h
 
 #include <unistd.h>
+#include <string.h>
 #include <sys/utsname.h>
 #include <wchar.h>
 #include <iconv.h>
